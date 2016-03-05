@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+    <head>
+        <title>
+            Angular demo
+        </title>
+        <script type="text/javascript" src="../libs/angular.js"></script>
+        <script type="text/javascript" src="app.js"></script>
+        <script type="text/javascript" src="filters.js"></script>
+    </head>
+    
+    <body ng-controller="MainController">
+        <h2>Stuart's page</h2>
+<!--        <p>Hello {{1+2}}</p>    -->
+        <p><input type="text" ng-model="itemIndex"><input type="button" value="Get pup" ng-click="getItem()"></p>
+        <p>Current Pup: {{ currentItem }}</p>
+        <p>Favourite Pup: {{ pups[1] }}</p>
+        
+        <div ng-controller="ParentController">
+        <p>{{sayHello(model.name)}}</p>
+            <input type="text" ng-model="model.name">
+            <p>This is the parent: {{ model.name }}</p>
+            
+            <div ng-controller="ChildController as child">
+                <input type="text" ng-model="model.name">
+                <p>This is the child: {{ model.name }}</p>
+                <p>First Name: {{child.user.firstName}}</p>
+                <p>Last Name:  {{child.user.lastName | uppercase}}</p>
+                <p>Title:      {{child.user.title | capitalize}}</p>
+                <p>Acct type:  {{child.user.accountType | capitalize}}</p>
+                <p>Balance:    {{child.user.balance | currency}}</p>
+                <ul ng-repeat="user in child.users | orderBy:'balance' | limitTo:2:2">
+                    <p>First Name: {{user.firstName}}</p>
+                    <p>Last Name:  {{user.lastName | uppercase}}</p>
+                    <p>Acct type:  {{user.accountType | capitalize}}</p>
+                    <p>Balance:    {{user.balance | currency}}</p>
+                </ul>
+                <p>{{ 432432532.5253451 | number:2 }}
+                <p>{{ child.user | json }}
+            </div>
+        </div>
+        <div ng-controller="ParentController">
+            <input type="text" ng-model="model.name">
+            <p>This is the parent: {{ model.name }}</p>
+        </div>
+    </body>
+</html>
+            
