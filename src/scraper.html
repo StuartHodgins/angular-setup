@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="../libs/angular.js"></script>
+    <!-- script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script> -->
+    <script type="text/javascript" src="e2app.js"></script>
+    <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body ng-app="myApp" ng-controller="myController">
+    <div>
+          <table class = "user-form">
+                <tr>
+                    <thm span=2>Sign in to everything2.net</th>
+                </tr>
+                <tr>
+                    <td>Login</td>
+                    <td><input type="Login" ng-model="username" /></td>
+                </tr>
+                <tr>
+                    <td>Password</td>
+                    <td><input type="password" ng-model="password" /></td>
+                </tr>
+              <tr>
+                    <td><input type="checkbox" ng-model="user.rememberMe"> remember me</td>
+                    <td><button ng-click="dologin()">Login</button></td>
+                </tr>
+            </table>
+    </div>
+    <div>
+        <ul>
+            <li>filler</li>
+        </ul>
+    </div>
+</body>
+</html>
