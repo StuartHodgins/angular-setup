@@ -18,18 +18,52 @@
                 return $http(request);
             },
  
-            getMyDinners: function () {
+            getMyData: function () {
  
-                var parseDinners = function (response) {
+                var parseData = function (response) {
  
                     var tmp = document.implementation.createHTMLDocument();
                     tmp.body.innerHTML = response.data;
+                    // Is it faster to avoid de-referencing repeatedly? 
+                    // var innertxt = tmp.body.innerHTML;
 
+                    var nodeTitle = '';
+                    var nodeAuthor = '';
+
+                    // Find the paragraphs to get the node title and author.
+                    // This relies on our content being in the first paragraph, 
+                    // which feels fragile but it's good enough for this task.
+                    // If we had to, we could scan the paragraph list for the
+                    // text starting with "You are viewing" to isolate this data.  
+                    var paragraphs = $('p', tmp.body.innerHTML);
+                    if (paragraphs.length>0) {
+/*
+                        // Debug lines
+                        console.log(paragraphs[0]);     
+*/
+                        // Now get the anchors to get the data 
+                        var anchors = $('a', paragraphs[0]);
+                        if (anchors.length>1) {
+/*                            
+                            // Debug lines
+                            console.log(anchors[0]);
+                            console.log(anchors[1]);
+*/                            
+                            // First anchor should be node title, second should be author
+                            nodeTitle = anchors[0].innerText;
+                            nodeAuthor = anchors[1].innerText;
+                        } else {
+                            console.log('not enough anchor tags found.');
+                        }
+                    } else {
+                        console.log('no <p> tags found.');
+                    }
+
+                    // Now parse the rep table to get the final entry.
 //                    var items = $(tmp.body).find('.upcomingdinners li');
-                    var innertxt = tmp.body.innerHTML;
 //                    var santxt = innertxt.getElementsByTagName( 'td');
                     // Get all of the table cell elements, so we can find the DateLabels
-                    var tablecells = $('td', innertxt);
+                    var tablecells = $('td', tmp.body.innerHTML);
                     var downvotes = '';
                     var upvotes = '';
                     var rep = '';
@@ -46,11 +80,13 @@
                             downvotes = tablecells[i+1].innerText;
                             upvotes = tablecells[i+4].innerText;
                             rep = tablecells[i+5].innerText;
+/*                            
                             // Debug lines
                             console.log(tablecells[i]);
                             console.log(tablecells[i+1]);
                             console.log(tablecells[i+4]);
                             console.log(tablecells[i+5]);
+*/                            
                             break;
                        }
                    }
@@ -61,6 +97,8 @@
                     var dinners = [];
 //                    for (var i = 0; i < items.length; i++) {
                         var dinner = {
+                            Title: nodeTitle,
+                            Author: nodeAuthor,
                             Downvotes: downvotes,
                             Upvotes: upvotes,
                             Rep: rep
@@ -75,7 +113,7 @@
                             .then(parseDinners); */
                 // Test for SCP-384, admin user must already be logged in.
                 return $http.get('http://everything2.net/node/superdoc/Reputation+Graph?id=2032386')
-                            .then(parseDinners);                     
+                            .then(parseData);                     
             }
             
         }
@@ -99,7 +137,7 @@
             var onSuccess = function (response) {
                 console.log("Login OK!");
  
-                scraperService.getMyDinners().then(
+                scraperService.getMyData().then(
                 function (response) {
                     $scope.dinners = response;
  
