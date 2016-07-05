@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--    <script type="text/javascript" src="../libs/angular.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+    <script type="text/javascript" src="e2RepApp.js"></script>
+    <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body ng-app="myApp" ng-controller="myController">
+    <div>
+      <form name="userForm" novalidate>
+          <table class = "user-form">
+                <tr>
+                    <thm span=2>Sign in to everything2.net</th>
+                </tr>
+                <tr>
+                    <td>Login</td>
+                    <td><input type="text" ng-model="username" /></td>
+                </tr>
+                <tr>
+                    <td>Password</td>
+                    <td><input type="password" ng-model="password" /></td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td><button ng-click="main.submitForm(userForm)">Login</button></td>
+                </tr>
+            <!--
+              <tr>
+                    <td><input type="checkbox" ng-model="rememberMe"> remember me</td>
+                    <td><button ng-click="dologin()">Login</button></td>
+                </tr>
+    -->
+            </table>
+        </form>
+        <!--
+        Login <input type="text" ng-model="username" /><br/>
+        password <input type="password" ng-model="password" />
+        <button ng-click="doLogin()">Login</button>
+        -->
+    </div>
+   
+    <div>
+        <ul>
+            <li ng-repeat="node in nodes">
+               [{{ node.Title }}] by [{{ node.Author }}] now has reputation {{ node.Rep }} ({{ node.Downvotes }} plus {{ node.Upvotes }}).
+        </ul>
+    </div>
+    <p> {{model.nodes}}</p>
+    
+</body>
+</html>
