@@ -43,8 +43,8 @@
     </div>
     <div>
         <ul>
-            <li ng-repeat="dinner in dinners">
-               {{ dinner.Title }} by {{ dinner.Author }} has {{ dinner.Downvotes }} plus {{ dinner.Upvotes }} equals {{ dinner.Rep }}
+            <li ng-repeat="node in nodes">
+               [{{ node.Title }}] by [{{ node.Author }}] now has reputation {{ node.Rep }} ({{ node.Downvotes }} plus {{ node.Upvotes }}).
         </ul>
     </div>
 </body>

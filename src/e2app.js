@@ -18,7 +18,7 @@
                 return $http(request);
             },
  
-            getMyData: function () {
+            getMyData: function (id) {
  
                 var parseData = function (response) {
  
@@ -50,7 +50,10 @@
                             console.log(anchors[1]);
 */                            
                             // First anchor should be node title, second should be author
-                            nodeTitle = anchors[0].innerText;
+                            // nodeTitle = anchors[0].innerText;
+                            // Strip the node type off, assumes this is the only open-parens
+                            var res = anchors[0].innerText.split('(');
+                            nodeTitle = res[0].trim();
                             nodeAuthor = anchors[1].innerText;
                         } else {
                             console.log('not enough anchor tags found.');
@@ -60,8 +63,6 @@
                     }
 
                     // Now parse the rep table to get the final entry.
-//                    var items = $(tmp.body).find('.upcomingdinners li');
-//                    var santxt = innertxt.getElementsByTagName( 'td');
                     // Get all of the table cell elements, so we can find the DateLabels
                     var tablecells = $('td', tmp.body.innerHTML);
                     var downvotes = '';
@@ -92,27 +93,23 @@
                    }
  
  
- //                   var items = $(tmp.body).find('.upcomingdinners li');
- 
-                    var dinners = [];
+                    var nodes = [];
 //                    for (var i = 0; i < items.length; i++) {
-                        var dinner = {
+                        var node = {
                             Title: nodeTitle,
                             Author: nodeAuthor,
                             Downvotes: downvotes,
                             Upvotes: upvotes,
                             Rep: rep
                         };
-                        dinners.push(dinner);
+                        nodes.push(node);
 //                    }
  
-                    return dinners;
+                    return nodes;
                 }
  
-/*                return $http.get('file:///D:/projects/data/Reputation%20Graph%20-%20Everything2.com.htm')
-                            .then(parseDinners); */
                 // Test for SCP-384, admin user must already be logged in.
-                return $http.get('http://everything2.net/node/superdoc/Reputation+Graph?id=2032386')
+                return $http.get('http://everything2.net/node/superdoc/Reputation+Graph?id='+id)
                             .then(parseData);                     
             }
             
@@ -127,21 +124,21 @@
                         2030381,
                          534168, 2019135, 2054289, 
                         2125488, 2026515, 2055167, 2115593, 2016434,
-                        2034240, 2112846,
-                        2108765, 2047133, 1185356,
-                        2026781
+                        2034240, 2112846, 2009696, 2073390, 2106213,
+                        2108765, 2047133, 1185356, 1948812, 1961518,
+                        2026781,
+                        2034811, 2053661, 2102210, 2105039, 2014146
                         ];
 
         $scope.doLogin = function () {
  
             var onSuccess = function (response) {
                 console.log("Login OK!");
- 
-                scraperService.getMyData().then(
+
+                scraperService.getMyData(node_ids[1]).then(
                 function (response) {
-                    $scope.dinners = response;
- 
-                });
+                    $scope.nodes = response;
+                 });
  
             };
  
