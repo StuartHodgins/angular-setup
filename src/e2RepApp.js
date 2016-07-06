@@ -5,26 +5,29 @@ angular.module('myApp', []);
 angular.module('myApp').controller('myController', ['$scope', '$http', '$interval', function($scope, $http, $interval) {
     console.log("Hello.");
 
-    // This 'magically' gets the response element so we can play with it.
+    // This is global so that multiple requests can amend it.  
+    var nodes = [];
+    // Make it available to the page
+    $scope.nodes = nodes;
+
+    // This callback gets the response element so we can parse it.
     var parseData = function (response) {
         var tmp = document.implementation.createHTMLDocument();
         tmp.body.innerHTML = response.data;
 
+        // Find the paragraphs to get the node title and author.
         var nodeTitle = '';
         var nodeAuthor = '';
-
-        // Find the paragraphs to get the node title and author.
-        // This relies on our content being in the first paragraph, 
+        // This relies on our target content being in the first paragraph, 
         // which feels fragile but it's good enough for this task.
-        // If we had to, we could scan the paragraph list for the
+        // If that changes, we could scan the paragraph list for the
         // text starting with "You are viewing" to isolate this data.  
         var paragraphs = $('p', tmp.body.innerHTML);
-        if (paragraphs.length>0) {
+        if (paragraphs.length > 0) {
 /*
-            // Debug lines
-            console.log(paragraphs[0]);     
+            console.log(paragraphs[0]);     // Debug line     
 */
-            // Now get the anchors to get the data 
+            // Get the anchors to parse the data from the first paragraph. 
             var anchors = $('a', paragraphs[0]);
             if (anchors.length>1) {
 /*                            
@@ -32,11 +35,19 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
                 console.log(anchors[0]);
                 console.log(anchors[1]);
 */                            
-                // First anchor should be node title, second should be author
-                // nodeTitle = anchors[0].innerText;
-                // Strip the node type off, assumes this is the only open-parens
+                // The first anchor should be the node title,
+                // and the second should be the author.
+                // For Title we need to strip the node type off,
+                // which is a suffix in parenthesis. 
+                // This code assumes the suffix has the only open-parens.
                 var res = anchors[0].innerText.split('(');
+                // If we get more than two elements of res we log it as a possible parse error.
+                if (res.length > 2) {
+                    console.log( 'Found ' + res.length-1 + 'open-parens in title, expected just one.');
+                }
+                // We'll end up with a trialing space that we do not want, trim it.
                 nodeTitle = res[0].trim();
+                // Author shoud be OK as-is, although with e2 one never knows for sure.
                 nodeAuthor = anchors[1].innerText;
             } else {
                 console.log('not enough anchor tags found.');
@@ -76,7 +87,6 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
         }
  
  
-        var nodes = [];
 //                    for (var i = 0; i < items.length; i++) {
             var node = {
                 Title: nodeTitle,
@@ -89,7 +99,6 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
             nodes.push(node);
 //                    }
 
-        $scope.nodes = nodes;
     }
 
       var node_ids = [2032386, 2055373, 2036540, 
@@ -99,12 +108,17 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
                          534168, 2019135, 2054289, 
                         2125488, 2026515, 2055167, 2115593, 2016434,
                         2034240, 2112846, 2009696, 2073390, 2106213,
-                        2108765, 2047133, 1185356, 1948812, 1961518,
+                        2108765, 2047133, 1185356, 2110635, 1961518,
                         2026781,
                         2034811, 2053661, 2102210, 2105039, 2014146
                         ];
 
-    return $http.get('http://everything2.net/node/superdoc/Reputation+Graph?id='+node_ids[0]).then(parseData);
+    // When the http get resolves, the response is passed to our callback function. 
+    // We could optionally add another error handling callback, if required.
+    var i = 0;
+    for (i=0; i<node_ids.length; i++) {
+        $http.get('http://everything2.net/node/superdoc/Reputation+Graph?id='+node_ids[i]).then(parseData);
+}
 
     this.submitForm = function(form) {
         if (form.$valid) {
