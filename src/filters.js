@@ -16,3 +16,19 @@ angular.module('myApp').filter('capitalize',function() {
        return result;
    };
  });
+
+/**
+ * Displays 'yes' for true and 'no' for false
+ */
+angular.module('myApp').filter('yesorno',function() {
+    return function(value){
+      if (value == true) {
+          return 'yes';
+      }  else if (value == false) {
+          return 'no';
+      } else {
+          return 'unknown';
+      }
+    };
+    
+});

@@ -8,7 +8,8 @@ angular.module('myApp').controller('MainController', ['$scope', '$interval', fun
     $scope.sayHello = function(name) {
         return $scope.message  + ' ' + name + '.';
     }
-    var items = [ 'Rocky', 'Chase', 'Marshall', 'Rubble', 'Zuma', 'Skye'];
+    var items = [ 'Rocky', 'Chase', 'Marshall', 
+            'Rubble', 'Zuma', 'Skye'];
     $scope.pups = [ 'Rocky', 'Chase', 'Marshall', 'Rubble', 'Zuma', 'Skye'];
     
     $scope.itemIndex = 0;
@@ -23,6 +24,15 @@ angular.module('myApp').controller('MainController', ['$scope', '$interval', fun
         $scope.getItem();
         
     }, 2000);
+    
+    this.submitForm = function(form) {
+        if (form.$valid) {
+            window.alert('Passed.');
+        } else {
+            window.alert('Failed.');
+        }
+    };
+    
 }]);
 
 angular.module('myApp').controller('ParentController', ['$scope', function($scope) {
@@ -32,37 +42,44 @@ angular.module('myApp').controller('ParentController', ['$scope', function($scop
 }]);
     
 angular.module('myApp').controller('ChildController', [function() {
+    this.accountTypeList = [ 'CHEQUING', 'SAVINGS', 'DAILY INTEREST', 'BEST RATE' ];
+
     this.user = {
         firstName: 'Hihn',
         lastName: 'Smyth',
         title: 'the duke of doubt',
         accountType: 'CHEQUING',
-        balance: 1234.56
+        balance: 1234.56,
+        isActive: true
     };
     this.users = [
         {
             firstName: 'Alice',
             lastName: 'Apple',
             accountType: 'CHEQUING',
-            balance: 1234.56
+            balance: 1234.56,
+            isActive: true
         },
         {
             firstName: 'Bob',
             lastName: 'Banana',
-            accountType: 'SAVING',
-            balance: 123.45
+            accountType: 'SAVINGS',
+            balance: 123.45,
+            isActive: true
         },
         {
             firstName: 'Carol',
             lastName: 'Cucumber',
             accountType: 'DAILY INTEREST',
-            balance: 12.34
+            balance: 12.34,
+            isActive: true
         },
         {
             firstName: 'Ted',
             lastName: 'Tomato',
             accountType: 'SAVING',
-            balance: 43.21
+            balance: 43.21,
+            isActive: true
         }];
 }]);
     

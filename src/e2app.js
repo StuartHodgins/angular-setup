@@ -73,8 +73,7 @@
                     // The page has other tables and cells which we need to pass by on the way up.
                     // None of the other tables are expected to have DateLabel class elements.
                    for (var i = tablecells.length-1; i>=0; i--) {
-//                   for (var i = 0; i < tablecells.length; i++) {
-                        if (tablecells[i].className == 'DateLabel') {
+                       if (tablecells[i].className == 'DateLabel') {
                             // For simplicity we rely on the table row structure:
                             //  DateLabel, DownvoteLabel, DownvoteGraph, 
                             //  UpvoteGraph, Upvotelabel, ReputationLabel
@@ -92,8 +91,7 @@
                        }
                    }
  
- 
-                    var nodes = [];
+                     var nodes = [];
 //                    for (var i = 0; i < items.length; i++) {
                         var node = {
                             Title: nodeTitle,

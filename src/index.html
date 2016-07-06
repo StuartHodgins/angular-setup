@@ -7,6 +7,7 @@
         <script type="text/javascript" src="../libs/angular.js"></script>
         <script type="text/javascript" src="app.js"></script>
         <script type="text/javascript" src="filters.js"></script>
+        <link rel="stylesheet" type="text/css" href="main.css">
     </head>
     
     <body ng-controller="MainController">
@@ -20,20 +21,34 @@
         <p>{{sayHello(model.name)}}</p>
             <input type="text" ng-model="model.name">
             <p>This is the parent: {{ model.name }}</p>
-            
+            <hr>
             <div ng-controller="ChildController as child">
                 <input type="text" ng-model="model.name">
                 <p>This is the child: {{ model.name }}</p>
+                <hr>
                 <p>First Name: {{child.user.firstName}}</p>
                 <p>Last Name:  {{child.user.lastName | uppercase}}</p>
                 <p>Title:      {{child.user.title | capitalize}}</p>
-                <p>Acct type:  {{child.user.accountType | capitalize}}</p>
+                <p>Acct type:  
+                <select ng-model="child.user.accountType" ng-options="acct for acct in child.accountTypeList">
+                   </select></p>
                 <p>Balance:    {{child.user.balance | currency}}</p>
+                <!-- Radio buttons -->
+                <p><input type="radio" ng-model="child.user.isActive" ng-value="true"> active
+                   <input type="radio" ng-model="child.user.isActive" ng-value="false">inactive</p>
+                <p>Active:  {{child.user.isActive | yesorno}}</p>
+                <hr>
                 <ul ng-repeat="user in child.users | orderBy:'balance' | limitTo:2:2">
                     <p>First Name: {{user.firstName}}</p>
                     <p>Last Name:  {{user.lastName | uppercase}}</p>
                     <p>Acct type:  {{user.accountType | capitalize}}</p>
+                    <p>Acct type:  
+                    <select ng-model="user.accountType" ng-options="acct for acct in child.accountTypeList">
+                    </select></p>
                     <p>Balance:    {{user.balance | currency}}</p>
+                    <!-- Checkbox -->
+                    <p><input type="checkbox" ng-model="user.isActive"> is Active</p>
+                    <p>Active:  {{user.isActive | yesorno}}</p>
                 </ul>
                 <p>{{ 432432532.5253451 | number:2 }}
                 <p>{{ child.user | json }}
