@@ -62,7 +62,6 @@
             <tr ng-repeat="node in nodes | orderBy:'Title'">
                 <td>{{ node.Title }}</td> 
                 <td>{{ node.Author }}</td>
-                <!-- angular overrides the TD tag so the formant doesn't take. TODO: Fix it. -->
                 <td align="right">{{ node.Downvotes }}</td> 
                 <td align="right">{{ node.Upvotes }}</td>
                 <td align="right">{{ node.Rep }}</td> 
