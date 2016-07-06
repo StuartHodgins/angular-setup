@@ -47,7 +47,7 @@
         <ul>
             <!-- Content may arrive in random-ish order, so we order by Title for consistency. -->
             <li ng-repeat="node in nodes | orderBy:'Title'">
-               [{{ node.Title }}] by [{{ node.Author }}] now has reputation {{ node.Rep }} ({{ node.Downvotes }} plus {{ node.Upvotes }}).
+               [<a href="http://everything2.net/title/{{ node.Title }}">{{ node.Title }}</a>] by [<a href="http://everything2.net/user/{{ node.Author }}">{{ node.Author }}</a>] now has reputation {{ node.Rep }} ({{ node.Downvotes }} plus {{ node.Upvotes }}).
         </ul>
     </div>
    
