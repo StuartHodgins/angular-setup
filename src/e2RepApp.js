@@ -3,14 +3,18 @@
 angular.module('myApp', []);
 
 angular.module('myApp').controller('myController', ['$scope', '$http', '$interval', function($scope, $http, $interval) {
-    console.log("Hello.");
 
     // This is global so that multiple requests can amend it.  
     var nodes = [];
     // Make it available to the page
     $scope.nodes = nodes;
 
-    // This callback gets the response element so we can parse it.
+    /** 
+     * Basic error handling for the parser.
+     * Currently just looks for an empty response and assumes that means that
+     * our http get was rejected because cross-site scripting  is not enabled.  
+     * @param data - response object
+     */
     var errorCallback = function (data) {
         // Maybe we can't do cross-site scripting?
         if (data.status == -1) {
@@ -22,33 +26,56 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
         }
     }
 
-    // This callback gets the response element so we can parse it.
-    var parseData = function (response) {
-        var tmp = document.implementation.createHTMLDocument();
-        tmp.body.innerHTML = response.data;
-
-        // Check that a Reputation Graph page was loaded.
-        var headers = $('h1', tmp.body.innerHTML);
-        if((headers.length == 0) || !angular.equals(headers[0].innerText,"Reputation Graph")) {
-            console.log("http get target was not an e2 Reputation Graph page.");
-            return null;
+    /** 
+     * Scan an HTML string for the Reputation Graph error text that indicates missing or bad credentials. 
+     * @param innerHTML - HTML string to scan
+     */
+    function checkForCredentialProblem(innerHTML) {
+        // Could not find the expected tags in the HTML. All that follows is an error check.
+        // Maybe we're not logged in? Check for the relevant error string.
+        
+        // Pending a patch to put the error in a <p> tag we need to search the <div> tags. 
+        var e2divs = $('div', innerHTML);
+        if(e2divs.length > 0) {
+            /* mainbody should always be present and is close to the top,
+                4th in my tests, but we should not rely on this sposition 
+                as the outer content could change. If we don't find it at
+                all, that's OK. No need to error check the error check here. */  
+            // Find mainbody and look inside for 'you are not allowed to see it'
+            for (var i = 0; i < e2divs.length; i++) {
+                if (e2divs[i].id == 'mainbody') {
+                    if (e2divs[i].innerText.indexOf("you are not allowed to see it") != -1) {
+                        console.log("You cannot get the reputation data. " + 
+                                    "You are not logged in or your credentials are bad.");     
+                    } else {
+                        console.log("Unknown problem: mainbody div says: " + e2divs[i].innerText);
+                    }
+                    break;
+                }
+            }
+        } else {
+            console.log('Unknown page problem: No or not enough anchor tags found.');
         }
+    }
 
+    /** 
+     * Scan an HTML string for the Title and Author anchor tags, and extract the corrresponding strings. 
+     * @param innerHTML - HTML string to scan
+     * @returns {Array} - a two element array with Title and Author, or null if they are not found. 
+     */
+    var parseTitleAndAuthorInfo = function (innerHTML) {
         // Find the paragraphs to get the node title and author.
         var nodeTitle = '';
         var nodeAuthor = '';
-        // This relies on our target content being in the first paragraph, 
-        // which feels fragile but it's good enough for this task.
-        // If that changes, we could scan the paragraph list for the
-        // text starting with "You are viewing" to isolate this data.  
-        var paragraphs = $('p', tmp.body.innerHTML);
+
+        var paragraphs = $('p', innerHTML);
         if (paragraphs.length > 0) {
 /*
             console.log(paragraphs[0]);     // Debug line     
 */
             // Get the anchors to parse the data from the first paragraph. 
             var anchors = $('a', paragraphs[0]);
-            if (anchors.length>1) {
+            if (anchors.length > 1) {
 /*                            
                 // Debug lines
                 console.log(anchors[0]);
@@ -66,43 +93,31 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
                 }
                 // We'll end up with a trialing space that we do not want, trim it.
                 nodeTitle = res[0].trim();
+
                 // Author shoud be OK as-is, although with e2 one never knows for sure.
                 nodeAuthor = anchors[1].innerText;
             } else {
-                // Could not find the expected anchor tags.
-                // Maybe we're not logged in. Check for the relevant error string.
-                // Pending a patch to put the error in a <p> tag we need to search the <div> tags. 
-                var e2divs = $('div', tmp.body.innerHTML);
-                if(e2divs.length > 0) {
-                    /* mainbody should always be present and is close to the top,
-                       4th in my tests, but we should not rely on this sposition 
-                       as the outer content could change. If we don't find it at
-                       all, that's OK. No need to error check the error check here. */  
-                    // Find mainbody and look inside for 'you are not allowed to see it'
-                    for (var i = 0; i < e2divs.length; i++) {
-                        if (e2divs[i].id == 'mainbody') {
-                            if (e2divs[i].innerText.indexOf("you are not allowed to see it") != -1) {
-                                console.log("You cannot get the reputation data. " + 
-                                            "You are not logged in or your credentials are bad.");     
-                            } else {
-                                console.log("Unknown problem: mainbody div says: " + e2divs[i].innerText);
-                            }
-                            break;
-                        }
-                    }
-                } else {
-                    console.log('Unknown page problem: No or not enough anchor tags found.');
-                }
+                // Could not find the expected anchor tags. All that follows is an error check.
+                // Maybe we're not logged in? Check for the relevant error string.
+                checkForCredentialProblem(innerHTML);
                 return null;
             }
         } else {
             console.log('no <p> tags found.');
             return null;
         }
+        return [nodeTitle, nodeAuthor];
+    }
 
+    /** 
+     * Scan an HTML string for the reputation data. 
+     * @param innerHTML - HTML string to scan
+     * @returns {Array} - a three element array with downvotes, upvotes, and reputation 
+     */
+    var parseReputationData = function (innerHTML) {
         // Now parse the rep table to get the final entry.
         // Get all of the table cell elements, so we can find the DateLabels
-        var tablecells = $('td', tmp.body.innerHTML);
+        var tablecells = $('td', innerHTML);
         var downvotes = '';
         var upvotes = '';
         var rep = '';
@@ -129,20 +144,49 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
                 break;
             }
         }
- 
+        return [downvotes, upvotes, rep];
+    }
+
+    /** 
+     * Takes the http get response and parses if for the data we need. 
+     * Currently just looks for an empty response and assumes that means that
+     * our http get was rejected because cross-site scripting  is not enabled.  
+     * @param response - response object
+     */
+    var parseData = function (response) {
+        var tmp = document.implementation.createHTMLDocument();
+        tmp.body.innerHTML = response.data;
+
+        // Check that a Reputation Graph page was loaded.
+        var headers = $('h1', tmp.body.innerHTML);
+        if((headers.length == 0) || !angular.equals(headers[0].innerText,"Reputation Graph")) {
+            console.log("http get target was not an e2 Reputation Graph page.");
+            return null;
+        }
+
+        // Find the paragraphs to get the node title and author.
+        var nodeData = parseTitleAndAuthorInfo(tmp.body.innerHTML);
+        if (nodeData == null) {
+            // Something is wrong, it should already be logged, exit
+            return null; 
+        }
+
+        // Now parse the rep table to get the final entry.
+        var repData = parseReputationData(tmp.body.innerHTML);
+
         // Set up the data elements for the HTML page.
         var node = {
-            Title: nodeTitle,
-            Author: nodeAuthor,
-            Downvotes: downvotes,
-            Upvotes: upvotes,
-            Rep: rep
+            Title: nodeData[0],
+            Author: nodeData[1],
+            Downvotes: repData[0],
+            Upvotes: repData[1],
+            Rep: repData[2]
         };
         console.log(node);
         nodes.push(node);
     }
 
-    // These are the everything2 nodes for the 'Lost Gems 2' quest. 
+    // These are the IDs of the everything2 nodes for the 'Lost Gems 2' quest. 
     var node_ids = [2032386, 2055373, 2036540, 
                     2112225, 2116484, 2115813, 2122985, 2061920,
                     2056831, 2063834, 2065581, 2109231, 2008232, 
