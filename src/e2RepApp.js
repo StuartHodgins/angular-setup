@@ -11,9 +11,28 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
     $scope.nodes = nodes;
 
     // This callback gets the response element so we can parse it.
+    var errorCallback = function (data) {
+        // Maybe we can't do cross-site scripting?
+        if (data.status == -1) {
+            console.log( "http get failed with no status. Is cross-site scripting enabled?");
+        } else {
+            /// Something else is wrong
+            console.log("Message: " + data);
+            console.log("Status: " + status); 
+        }
+    }
+
+    // This callback gets the response element so we can parse it.
     var parseData = function (response) {
         var tmp = document.implementation.createHTMLDocument();
         tmp.body.innerHTML = response.data;
+
+        // Check that a Reputation Graph page was loaded.
+        var headers = $('h1', tmp.body.innerHTML);
+        if((headers.length == 0) || !angular.equals(headers[0].innerText,"Reputation Graph")) {
+            console.log("http get target was not an e2 Reputation Graph page.");
+            return null;
+        }
 
         // Find the paragraphs to get the node title and author.
         var nodeTitle = '';
@@ -50,10 +69,35 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
                 // Author shoud be OK as-is, although with e2 one never knows for sure.
                 nodeAuthor = anchors[1].innerText;
             } else {
-                console.log('not enough anchor tags found.');
+                // Could not find the expected anchor tags.
+                // Maybe we're not logged in. Check for the relevant error string.
+                // Pending a patch to put the error in a <p> tag we need to search the <div> tags. 
+                var e2divs = $('div', tmp.body.innerHTML);
+                if(e2divs.length > 0) {
+                    /* mainbody should always be present and is close to the top,
+                       4th in my tests, but we should not rely on this sposition 
+                       as the outer content could change. If we don't find it at
+                       all, that's OK. No need to error check the error check here. */  
+                    // Find mainbody and look inside for 'you are not allowed to see it'
+                    for (var i = 0; i < e2divs.length; i++) {
+                        if (e2divs[i].id == 'mainbody') {
+                            if (e2divs[i].innerText.indexOf("you are not allowed to see it") != -1) {
+                                console.log("You cannot get the reputation data. " + 
+                                            "You are not logged in or your credentials are bad.");     
+                            } else {
+                                console.log("Unknown problem: mainbody div says: " + e2divs[i].innerText);
+                            }
+                            break;
+                        }
+                    }
+                } else {
+                    console.log('Unknown page problem: No or not enough anchor tags found.');
+                }
+                return null;
             }
         } else {
             console.log('no <p> tags found.');
+            return null;
         }
 
         // Now parse the rep table to get the final entry.
@@ -115,7 +159,7 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
     // We could optionally add another error handling callback, if required.
     var i = 0;
     for (i=0; i<node_ids.length; i++) {
-        $http.get('http://everything2.net/node/superdoc/Reputation+Graph?id='+node_ids[i]).then(parseData);
+        $http.get('http://everything2.net/node/superdoc/Reputation+Graph?id='+node_ids[i]).then(parseData, errorCallback);
 }
 
     // The form does nothing. Why? To look at later, if the need arises.
