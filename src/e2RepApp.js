@@ -86,32 +86,30 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
             }
         }
  
- 
-//                    for (var i = 0; i < items.length; i++) {
-            var node = {
-                Title: nodeTitle,
-                Author: nodeAuthor,
-                Downvotes: downvotes,
-                Upvotes: upvotes,
-                Rep: rep
-            };
-            console.log(node);
-            nodes.push(node);
-//                    }
-
+        // Set up the data elements for the HTML page.
+        var node = {
+            Title: nodeTitle,
+            Author: nodeAuthor,
+            Downvotes: downvotes,
+            Upvotes: upvotes,
+            Rep: rep
+        };
+        console.log(node);
+        nodes.push(node);
     }
 
-      var node_ids = [2032386, 2055373, 2036540, 
-                        2112225, 2116484, 2115813, 2122985, 2061920,
-                        2056831, 2063834, 2065581, 2109231, 2008232, 
-                        2030381,
-                         534168, 2019135, 2054289, 
-                        2125488, 2026515, 2055167, 2115593, 2016434,
-                        2034240, 2112846, 2009696, 2073390, 2106213,
-                        2108765, 2047133, 1185356, 2110635, 1961518,
-                        2026781,
-                        2034811, 2053661, 2102210, 2105039, 2014146
-                        ];
+    // These are the everything2 nodes for the 'Lost Gems 2' quest. 
+    var node_ids = [2032386, 2055373, 2036540, 
+                    2112225, 2116484, 2115813, 2122985, 2061920,
+                    2056831, 2063834, 2065581, 2109231, 2008232, 
+                    2030381,
+                        534168, 2019135, 2054289, 
+                    2125488, 2026515, 2055167, 2115593, 2016434,
+                    2034240, 2112846, 2009696, 2073390, 2106213,
+                    2108765, 2047133, 1185356, 2110635, 1961518,
+                    2026781,
+                    2034811, 2053661, 2102210, 2105039, 2014146
+                    ];
 
     // When the http get resolves, the response is passed to our callback function. 
     // We could optionally add another error handling callback, if required.
@@ -120,6 +118,7 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
         $http.get('http://everything2.net/node/superdoc/Reputation+Graph?id='+node_ids[i]).then(parseData);
 }
 
+    // The form does nothing. Why? To look at later, if the need arises.
     this.submitForm = function(form) {
         if (form.$valid) {
             window.alert('Passed.');
