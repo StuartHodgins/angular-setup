@@ -46,7 +46,9 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
                 if (e2divs[i].id == 'mainbody') {
                     if (e2divs[i].innerText.indexOf("you are not allowed to see it") != -1) {
                         console.log("You cannot get the reputation data. " + 
-                                    "You are not logged in or your credentials are bad.");     
+                                    "You are not logged in or your credentials are bad.");
+                    } else if (e2divs[i].innerText.indexOf("You can only view the reputation graph for writeups") != -1) {
+                        console.log("This is not a writeup."); 
                     } else {
                         console.log("Unknown problem: mainbody div says: " + e2divs[i].innerText);
                     }
@@ -99,6 +101,7 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
             } else {
                 // Could not find the expected anchor tags. All that follows is an error check.
                 // Maybe we're not logged in? Check for the relevant error string.
+                // It might also be a bad node ID.
                 checkForCredentialProblem(innerHTML);
                 return null;
             }
@@ -168,6 +171,7 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
         var nodeData = parseTitleAndAuthorInfo(tmp.body.innerHTML);
         if (nodeData == null) {
             // Something is wrong, it should already be logged, exit
+            console.log("Error parsing: " + response.config.url);
             return null; 
         }
 
@@ -182,7 +186,6 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
             Upvotes: repData[1],
             Rep: repData[2]
         };
-        console.log(node);
         nodes.push(node);
     }
 
@@ -190,8 +193,9 @@ angular.module('myApp').controller('myController', ['$scope', '$http', '$interva
     var node_ids = [2032386, 2055373, 2036540, 
                     2112225, 2116484, 2115813, 2122985, 2061920,
                     2056831, 2063834, 2065581, 2109231, 2008232, 
-                    2030381,
-                        534168, 2019135, 2054289, 
+                    2030381, 
+//                    8933, //  node ID of a user, tests code to handle bad IDs that are not for writeups      
+                    534168, 2019135, 2054289, 
                     2125488, 2026515, 2055167, 2115593, 2016434,
                     2034240, 2112846, 2009696, 2073390, 2106213,
                     2108765, 2047133, 1185356, 2110635, 1961518,
